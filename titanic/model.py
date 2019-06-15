@@ -17,6 +17,15 @@ Embarked  승선한 항구명  Port of Embarkation
 """
 import pandas as pd
 import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import KFold
+from sklearn.model_selection import cross_val_score
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.svm import SVC
+from sklearn import metrics
 
 class TitanicModel:
     def __init__(self):
@@ -63,6 +72,8 @@ class TitanicModel:
         t = self.title_nominal(t[0], t[1])
         print('----------4. Name, PassengerId 삭제----------------------')
         t = self.drop_feature(t[0], t[1], 'Name')
+        # test_id가 있어야 sklearn에서 테스트가 가능하다.
+        self.test_id = test['PassengerId']
         t = self.drop_feature(t[0], t[1], 'PassengerId')
         print('----------5. Age 편집----------------------')
         t = self.age_ordinal(t[0], t[1])
@@ -76,13 +87,14 @@ class TitanicModel:
         t = self.sex_nominal(t[0], t[1])
 
         t[1] = t[1].fillna({"FareBand" : 1})
-        print("*** test 널의 수 조사")
+        print("*** Null Count 조사 (test dataset) ***")
         self.null_sum(t[1])
 
         #print(t[1].isnull())
         #print(t[1]['Sex'].value_counts())
         #print(t[1]['FairBand'].value_counts())
         #print(t[1][t[1]['FareBand'].isnull() == True])
+
 
         self._test = t[1]
         return t[0]
@@ -205,3 +217,92 @@ class TitanicModel:
         print(train.columns)
 
         return [train, test]
+
+    # 검증 알고리즘 작성
+
+    @staticmethod
+    def create_random_variables(train, X_features, Y_features)->[]:
+        the_X_features = X_features
+        the_Y_features = Y_features
+        train2, test2 = train_test_split(train, test_size=0.3, random_state=0)
+        train_X = train2[the_X_features]
+        train_Y = train2[the_Y_features]
+        test_X = test2[the_X_features]
+        test_Y = test2[the_Y_features]
+        return[train_X, train_Y, test_X, test_Y]
+
+    @staticmethod
+    def create_k_fold():
+        k_fold = KFold(n_splits=10, shuffle=True, random_state=0)
+        return k_fold
+
+    def hook_test(self, model, dummy):
+        #print("랜덤변수 활용한 검증 정확도 {} %".format(self.accuracy_random_variables()))
+        print("KNN 활용한 검증 정확도 {} %".format(self.accuracy_by_knn(model, dummy)))
+        print("결정트리 활용한 검증 정확도 {} %".format(self.accuracy_by_dtree(model, dummy)))
+        print("랜덤포레스트 활용한 검증 정확도 {} %".format(self.accuracy_by_rforest(model, dummy)))
+        print("나이브베이즈 활용한 검증 정확도 {} %".format(self.accuracy_by_nb(model, dummy)))
+        print("SVM 활용한 검증 정확도 {} %".format(self.accuracy_by_svm(model, dummy)))
+
+    def accuracy_random_variables(self) -> str:
+        print("-----------검증---------")
+        train = self._train
+        X_features = ['Pclass', 'Sex', 'Embarked']
+        Y_features = ['Survived']
+        random_variables = self.create_random_variables(train, X_features, Y_features)
+        accuracy = self.accuracy_by_decision_tree(
+            random_variables[0],
+            random_variables[1],
+            random_variables[2],
+            random_variables[3],
+        )
+        return accuracy
+
+    def accuracy_by_knn(self, model, dummy)->str:
+        print('>>> KNN 방식 검증')
+        clf = KNeighborsClassifier(n_neighbors=13)
+        scoring = 'accuracy'
+        k_fold = self.create_k_fold()
+        score = cross_val_score(clf, model, dummy, cv=k_fold, n_jobs=1, scoring=scoring)
+        accuracy = round(np.mean(score)*100, 2)
+        return accuracy
+
+    def accuracy_by_dtree(self, model, dummy) -> str:
+        print('>>> 결정트리 방식 검증')  # 79.58
+        k_fold = self.create_k_fold()
+        clf = DecisionTreeClassifier()
+        scoring = 'accuracy'
+        score = cross_val_score(clf, model, dummy, cv=k_fold,
+                                n_jobs=1, scoring=scoring)
+        accuracy = round(np.mean(score) * 100, 2)
+        return accuracy
+
+    def accuracy_by_rforest(self, model, dummy) -> str:
+        print('>>> 램덤포레스트 방식 검증')  # 82.15
+        k_fold = self.create_k_fold()
+        clf = RandomForestClassifier(n_estimators=13)  # 13개의 결정트리를 사용함
+        scoring = 'accuracy'
+        score = cross_val_score(clf, model, dummy, cv=k_fold,
+                                n_jobs=1, scoring=scoring)
+        accuracy = round(np.mean(score) * 100, 2)
+        return accuracy
+
+    def accuracy_by_nb(self, model, dummy) -> str:
+        print('>>> 나이브베이즈 방식 검증')  # 79.57
+        clf = GaussianNB()
+        k_fold = self.create_k_fold()
+        scoring = 'accuracy'
+        score = cross_val_score(clf, model, dummy, cv=k_fold,
+                                n_jobs=1, scoring=scoring)
+        accuracy = round(np.mean(score) * 100, 2)
+        return accuracy
+
+    def accuracy_by_svm(self, model, dummy) -> str:
+        k_fold = self.create_k_fold()
+        print('>>> SVM 방식 검증')  # 83.05
+        clf = SVC()
+        scoring = 'accuracy'
+        score = cross_val_score(clf, model, dummy, cv=k_fold,
+                                n_jobs=1, scoring=scoring)
+        accuracy = round(np.mean(score) * 100, 2)
+        return accuracy

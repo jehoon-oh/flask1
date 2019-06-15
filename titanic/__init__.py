@@ -4,6 +4,8 @@ from titanic.view import TitanicView
 if __name__ == '__main__':
     ctrl = TitanicController()
     ctrl.create_train()
+    ctrl.test_all()
+    ctrl.submit()
 
     #view = TitanicView()
     #t = view.create_train()

@@ -1,3 +1,4 @@
+
 from flask import Flask
 from flask import render_template, request, jsonify
 import re
@@ -9,7 +10,6 @@ app = Flask(__name__)
 @app.route('/')
 def hello_world():
     return render_template('index.html')
-
 '''
 @app.route("/move/ui_calc")
 def move_ui_calc():

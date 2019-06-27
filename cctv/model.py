@@ -29,13 +29,16 @@ class CCTVModel:
         return pd.read_excel(file, encoding='UTF-8', header=header, usecols=usecols)
 
     def hook_process(self) -> object:
-        # self.create_cctv_pop()
+        #self.create_cctv_pop()
+
         self.context = './data/'
         self.fname = 'crime_in_Seoul.csv'
         crime = self.csv_to_dframe()
+        print(crime)
         print(crime.columns)
-        # police = pd.pivot_table(crime, index='구별', aggfunc=np.sum)
-        # print(police.columns)
+
+        #police = pd.pivot_table(crime, index='구별', aggfunc=np.sum)
+        #print(police.columns)
 
     def create_cctv_pop(self) -> object:
         self.context = './data/'
@@ -52,11 +55,8 @@ class CCTVModel:
         print(pop_idx)
 
         cctv.rename(columns={cctv.columns[0]: '구별'}, inplace=True)
-        pop.rename(columns={pop.columns[0]: '구별',
-                            pop.columns[1]: '인구수',
-                            pop.columns[2]: '한국인',
-                            pop.columns[3]: '외국인',
-                            pop.columns[4]: '고령자'
+        pop.rename(columns={pop.columns[0]: '구별', pop.columns[1]: '인구수',
+                            pop.columns[2]: '한국인', pop.columns[3]: '외국인', pop.columns[4]: '고령자'
                             }, inplace=True)
 
         # cctv.sort_values(by='소계', ascending=True)
@@ -71,6 +71,7 @@ class CCTVModel:
         cctv.drop(['2013년도 이전', '2014년', '2015년', '2016년'], 1, inplace=True)
         cctv_pop = pd.merge(cctv, pop, on='구별')
         cctv_pop.set_index('구별', inplace=True)
+        print(cctv_pop)
 
         cor1 = np.corrcoef(cctv_pop['고령자비율'], cctv_pop['소계'])
         cor2 = np.corrcoef(cctv_pop['외국인비율'], cctv_pop['소계'])
@@ -80,7 +81,7 @@ class CCTVModel:
         """
         r이 -1.0과 -0.7 사이이면, 강한 음적 선형관계,
         r이 -0.7과 -0.3 사이이면, 뚜렷한 음적 선형관계,
-        r이 -0.3과 -0.1 사이이면, 약한 음적 선형관계,
+        r이 -0.3과 -0.1 사이이면, 약한 음적dkfo ck 선형관계,
         r이 -0.1과 +0.1 사이이면, 거의 무시될 수 있는 선형관계,
         r이 +0.1과 +0.3 사이이면, 약한 양적 선형관계,
         r이 +0.3과 +0.7 사이이면, 뚜렷한 양적 선형관계,
@@ -91,4 +92,4 @@ class CCTVModel:
                                     [-0.13607433  1.        ]]
         """
 
-        cctv_pop.to_csv(self.context + 'cctv_pop.csv')
+        cctv_pop.to_csv(self.context + 'cctv_pop.csv', encoding='euc-kr')

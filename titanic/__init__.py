@@ -4,8 +4,6 @@ from titanic.view import TitanicView
 if __name__ == '__main__':
     ctrl = TitanicController()
     #ctrl.create_train()
-    ctrl.test_all()
-    ctrl.submit()
 
     #view = TitanicView()
     #t = view.create_train()
@@ -13,3 +11,7 @@ if __name__ == '__main__':
     #view.plot_sex(t)
     #view.bar_chart(t, 'Sex')
     #view.plot_pclass_sex(t)
+
+    #ctrl.test_all()
+
+    ctrl.submit()

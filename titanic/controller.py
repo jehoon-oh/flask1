@@ -31,6 +31,12 @@ class TitanicController:
 
         return train
 
+    def test_all(self):
+        model = self.create_model()
+        dummy = self.create_dummy()
+        m = self._m
+        m.hook_test(model, dummy)
+
     def create_model(self):
         train = self._train
         model = train.drop('Survived', axis = 1)
@@ -42,12 +48,6 @@ class TitanicController:
         train = self._train
         dummy = train['Survived']
         return dummy
-
-    def test_all(self):
-        model = self.create_model()
-        dummy = self.create_dummy()
-        m = self._m
-        m.hook_test(model, dummy)
 
     def submit(self):
         m = self._m

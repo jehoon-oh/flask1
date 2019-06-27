@@ -218,6 +218,8 @@ class TitanicModel:
 
         return [train, test]
 
+
+
     # 검증 알고리즘 작성
 
     @staticmethod
@@ -230,19 +232,6 @@ class TitanicModel:
         test_X = test2[the_X_features]
         test_Y = test2[the_Y_features]
         return[train_X, train_Y, test_X, test_Y]
-
-    @staticmethod
-    def create_k_fold():
-        k_fold = KFold(n_splits=10, shuffle=True, random_state=0)
-        return k_fold
-
-    def hook_test(self, model, dummy):
-        #print("랜덤변수 활용한 검증 정확도 {} %".format(self.accuracy_random_variables()))
-        print("KNN 활용한 검증 정확도 {} %".format(self.accuracy_by_knn(model, dummy)))
-        print("결정트리 활용한 검증 정확도 {} %".format(self.accuracy_by_dtree(model, dummy)))
-        print("랜덤포레스트 활용한 검증 정확도 {} %".format(self.accuracy_by_rforest(model, dummy)))
-        print("나이브베이즈 활용한 검증 정확도 {} %".format(self.accuracy_by_nb(model, dummy)))
-        print("SVM 활용한 검증 정확도 {} %".format(self.accuracy_by_svm(model, dummy)))
 
     def accuracy_random_variables(self) -> str:
         print("-----------검증---------")
@@ -257,6 +246,19 @@ class TitanicModel:
             random_variables[3],
         )
         return accuracy
+
+    @staticmethod
+    def create_k_fold():
+        k_fold = KFold(n_splits=10, shuffle=True, random_state=0)
+        return k_fold
+
+    def hook_test(self, model, dummy):
+        #print("랜덤변수 활용한 검증 정확도 {} %".format(self.accuracy_random_variables()))
+        print("KNN 활용한 검증 정확도 {} %".format(self.accuracy_by_knn(model, dummy)))
+        print("결정트리 활용한 검증 정확도 {} %".format(self.accuracy_by_dtree(model, dummy)))
+        print("랜덤포레스트 활용한 검증 정확도 {} %".format(self.accuracy_by_rforest(model, dummy)))
+        print("나이브베이즈 활용한 검증 정확도 {} %".format(self.accuracy_by_nb(model, dummy)))
+        print("SVM 활용한 검증 정확도 {} %".format(self.accuracy_by_svm(model, dummy)))
 
     def accuracy_by_knn(self, model, dummy)->str:
         print('>>> KNN 방식 검증')
@@ -278,7 +280,7 @@ class TitanicModel:
         return accuracy
 
     def accuracy_by_rforest(self, model, dummy) -> str:
-        print('>>> 램덤포레스트 방식 검증')  # 82.15
+        print('>>> 랜덤포레스트 방식 검증')  # 82.15
         k_fold = self.create_k_fold()
         clf = RandomForestClassifier(n_estimators=13)  # 13개의 결정트리를 사용함
         scoring = 'accuracy'

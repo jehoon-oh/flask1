@@ -1,15 +1,42 @@
-
 from flask import Flask
 from flask import render_template, request, jsonify
 import re
 from calculator.controller import CalculatorController
 from titanic.controller import TitanicController
+from members.controller import MemberController
+from cabbage.controller import CabbageController
 
 app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
-    return render_template('index.html')
+    ctrl = MemberController()
+    ctrl.create_table()
+    return render_template('intro.html')
+
+@app.route("/cabbage", methods=['GET', 'POST'])
+def predict_cabbage():
+    avg_temp = request.form['avg_temp']
+    min_temp = request.form['min_temp']
+    max_temp = request.form['max_temp']
+    rain_fall = request.form['rain_fall']
+    c = CabbageController(avg_temp, min_temp, max_temp, rain_fall)
+    result = c.service()
+    render_params = {}
+    render_params['result'] = result
+    return render_template('cabbage.html', **render_params)
+
+@app.route("/login", methods=['POST'])
+def login():
+    print('로그인 진입')
+    userid = request.form['userid']
+    password = request.form['password']
+    print("userid %s" % (userid))
+    print("password %s" % (password))
+    ctrl = MemberController()
+    view = ctrl.login(userid, password)
+    return render_template(view)
+
 '''
 @app.route("/move/ui_calc")
 def move_ui_calc():
